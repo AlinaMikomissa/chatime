@@ -1,26 +1,52 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* ── CháTime Design Tokens ── */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Colors */
+  --color-bg-dark: #151110;
+  --color-bg-sidebar: #191412;
+  --color-bg-card: #1E1916;
+  --color-bg-input: #251E1A;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-accent-gold: #C69250;
+  --color-accent-muted: #936C3C;
+
+  --color-semantic-green: #6B8E60;
+  --color-semantic-red: #BF4738;
+
+  --color-text-primary: #EAE0D4;
+  --color-text-secondary: #9E9285;
+  --color-text-muted: #6B635B;
+  --color-border: #332B26;
+
+  /* Spacing */
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
+  --spacing-20: 80px;
+
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-input: 8px;
+  --radius-card: 12px;
+  --radius-tag: 14px;
+  --radius-btn-secondary: 20px;
+  --radius-btn-primary: 26px;
+  --radius-full: 999px;
+
+  /* Fonts */
+  --font-sans: var(--font-inter);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg-dark);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans), system-ui, sans-serif;
 }
