@@ -63,12 +63,21 @@ export function TimerArea({ tea, sessionState, actions }: TimerAreaProps) {
     timerState = "running";
   }
 
+  // Progress as elapsed fraction (0 = start, 1 = fully elapsed)
   const progress =
     currentSteepSeconds > 0
       ? (currentSteepSeconds - secondsRemaining) / currentSteepSeconds
       : 0;
 
   const timeDisplay = formatTime(secondsRemaining);
+
+  // Next brew steep time for the button label
+  const nextInfusionIndex = currentInfusion + 1;
+  const hasNextInfusion = nextInfusionIndex < totalInfusions;
+  const nextSteepSeconds = hasNextInfusion
+    ? tea.brewingParameters.baseSteepSeconds +
+      nextInfusionIndex * tea.brewingParameters.steepIncrementSeconds
+    : 0;
 
   return (
     <main className="flex flex-1 flex-col items-center justify-between bg-bg-dark overflow-hidden">
@@ -135,12 +144,21 @@ export function TimerArea({ tea, sessionState, actions }: TimerAreaProps) {
 
         {brewingState === "complete" && (
           <>
-            <button
-              onClick={actions.pourAndNext}
-              className="h-12 w-56 rounded-btn-primary bg-accent-gold text-base font-semibold text-bg-dark transition-colors hover:bg-accent-gold/90"
-            >
-              Pour & Next →
-            </button>
+            {hasNextInfusion ? (
+              <button
+                onClick={actions.pourAndNext}
+                className="h-12 w-56 rounded-btn-primary bg-accent-gold text-base font-semibold text-bg-dark transition-colors hover:bg-accent-gold/90"
+              >
+                Next Brew ({nextSteepSeconds}s)
+              </button>
+            ) : (
+              <button
+                onClick={actions.endSession}
+                className="h-12 w-56 rounded-btn-primary bg-accent-gold text-base font-semibold text-bg-dark transition-colors hover:bg-accent-gold/90"
+              >
+                End Session
+              </button>
+            )}
             <div className="flex gap-2 w-[211px]">
               <button
                 onClick={actions.endSession}

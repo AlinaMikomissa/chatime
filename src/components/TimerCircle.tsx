@@ -6,25 +6,25 @@ interface TimerCircleProps {
   state: TimerState;
   timeDisplay?: string;
   subtitle?: string;
-  progress?: number; // 0 to 1, used for running state
+  progress?: number; // 0 to 1, elapsed fraction (0 = start, 1 = done)
 }
 
 const stateConfig: Record<
   TimerState,
-  { ringColor: string; defaultText: string; defaultSub: string }
+  { defaultText: string; defaultSub: string }
 > = {
-  running: { ringColor: "stroke-accent-gold", defaultText: "0:45", defaultSub: "remaining" },
-  ready: { ringColor: "stroke-accent-gold", defaultText: "0:15", defaultSub: "ready" },
-  complete: { ringColor: "stroke-semantic-green", defaultText: "0:00", defaultSub: "pour now" },
-  done: { ringColor: "stroke-semantic-green", defaultText: "茶", defaultSub: "well brewed" },
-  empty: { ringColor: "stroke-text-muted", defaultText: "茶", defaultSub: "" },
+  running: { defaultText: "0:45", defaultSub: "remaining" },
+  ready: { defaultText: "0:15", defaultSub: "ready" },
+  complete: { defaultText: "0:00", defaultSub: "pour now" },
+  done: { defaultText: "茶", defaultSub: "well brewed" },
+  empty: { defaultText: "茶", defaultSub: "" },
 };
 
 export function TimerCircle({
   state,
   timeDisplay,
   subtitle,
-  progress = 0.67,
+  progress = 0,
 }: TimerCircleProps) {
   const config = stateConfig[state];
   const display = timeDisplay ?? config.defaultText;
@@ -35,38 +35,52 @@ export function TimerCircle({
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
 
-  // For running state, show partial arc; others show full ring
-  const isPartial = state === "running";
-  const dashOffset = isPartial ? circumference * (1 - progress) : 0;
-  const ringOpacity = state === "empty" ? 0.3 : 1;
+  // Progress ring: gold that depletes as time passes
+  // ready: full gold ring (dashOffset = 0)
+  // running: gold shrinks from full to empty (dashOffset increases with progress)
+  // complete: progress ring hidden (opacity 0), track becomes green
+  // empty: muted ring
+  const isRunning = state === "running";
+  const isComplete = state === "complete" || state === "done";
+  const isEmpty = state === "empty";
+
+  const dashOffset = isRunning ? circumference * progress : 0;
+  const progressOpacity = isComplete ? 0 : isEmpty ? 0.3 : 1;
 
   const isLargeText = display === "茶";
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
-        {/* Track */}
+      <svg width={size} height={size} className="rotate-90 -scale-x-100">
+        <defs>
+          <linearGradient id="greenGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#6B8E60" />
+            <stop offset="100%" stopColor="#8BAF80" />
+          </linearGradient>
+        </defs>
+        {/* Track: brown border normally, green gradient when complete */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          className="stroke-border"
+          stroke={isComplete ? "url(#greenGradient)" : undefined}
+          className={isComplete ? undefined : "stroke-border"}
           strokeWidth={strokeWidth}
         />
-        {/* Progress ring */}
+        {/* Progress ring: accent gold, depletes during brewing */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          className={config.ringColor}
+          className={isEmpty ? "stroke-text-muted" : "stroke-accent-gold"}
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={dashOffset}
-          opacity={ringOpacity}
-          style={{ transition: "stroke-dashoffset 1s ease-in-out" }}
+          opacity={progressOpacity}
+          style={{ transition: "stroke-dashoffset 1s ease-in-out, opacity 0.3s ease" }}
         />
       </svg>
 
